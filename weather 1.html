@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barriecito&family=Lato:wght@700&family=Lavishly+Yours&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Rock+Salt&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://i.pinimg.com/1200x/1f/77/95/1f7795b5c9adea6af7a69c049a396c5d.jpg') no-repeat center center/cover;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+        }
+        h2{
+            font-family: "Barriecito", system-ui;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 50px;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: rgb(0, 13, 32);
+            border: none;
+            color: #7accf8;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover{
+            background:#7accf8;
+            color:rgb(0, 13, 32);
+        }
+        .weather-info {
+            margin-top: 20px;
+        }
+        .weather-icon {
+            width: 100px;
+            height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Weather App</h2>
+        <input type="text" id="city" placeholder="Enter city name">
+        <button onclick="getWeather()">Get Weather</button>
+        <div class="weather-info" id="weather-info"></div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('city').value;
+            if (!city) {
+                alert('Please enter a city name');
+                return;
+            }
+            
+            try {
+                const geoResponse = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1&language=en&format=json`);
+                const geoData = await geoResponse.json();
+                
+                if (!geoData.results || geoData.results.length === 0) {
+                    alert('City not found');
+                    return;
+                }
+                
+                const { latitude, longitude, name, country } = geoData.results[0];
+                
+                const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+                const weatherData = await weatherResponse.json();
+                
+                document.getElementById('weather-info').innerHTML = `
+                    <h3>${name}, ${country}</h3>
+                    <img class="weather-icon" src="https://source.unsplash.com/100x100/?weather,cloud" alt="Weather icon">
+                    <p>Temperature: ${weatherData.current_weather.temperature}°C</p>
+                    <p>Weather: ${weatherData.current_weather.weathercode}</p>
+                    <p>Wind Speed: ${weatherData.current_weather.windspeed} km/h</p>
+                `;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                alert('Something went wrong. Try again.');
+            }
+        }
+    </script>
+</body>
+</html>
